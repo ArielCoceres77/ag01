@@ -4904,7 +4904,7 @@ body.modo-coloquio #coloquioPanel{display:flex}
     const con = L.filter((x) => x.lugar).sort((a, b) => a.lugar - b.lugar), sin = L.filter((x) => !x.lugar);
     const alumnos = L.reduce((a, x) => a + x.integrantes.length, 0);
     const ord = new Map(con.map((x, i) => [x.id, i + 1]));
-    const linea = (x) => "«" + x.nombreProyecto + "» de " + x.integrantes.join(", ") + " (" + (x.modalidad === "Individual" ? "individual" : "grupo de " + x.integrantes.length) + "); " + proy(x) + ". Objetivos: " + String(x.descripcion).slice(0, 280) + ". Herramientas: " + x.herramientas + "." + (x.enlace ? " Repositorio: " + x.enlace + "." : "");
+    const linea = (x) => "«" + x.nombreProyecto + "» de " + x.integrantes.join(", ") + " (" + (x.modalidad === "Individual" ? "individual" : "grupo de " + x.integrantes.length) + "); " + proy(x) + ". Objetivos: " + String(x.descripcion).slice(0, 280) + ". Herramientas: " + x.herramientas + ".";
     let s = "NOVEDADES DEL COLOQUIO FINAL del Auxiliar en IA, datos reales de la planilla de inscripción (actualizado " + hora(Date.now()) + " h). ";
     s += "Se expone en dos jornadas: martes 17 de noviembre (lugares 1 al 16) y martes 24 de noviembre (lugares 17 al 32). Cada lugar es un proyecto, individual o de 2 o 3 estudiantes. ";
     s += "Estado: " + estadoTxt() + ". Hay " + L.length + " proyectos inscriptos de 32 lugares, con " + alumnos + " estudiantes. ";
@@ -4926,7 +4926,7 @@ body.modo-coloquio #coloquioPanel{display:flex}
   function pintar() {
     const L = (datos && datos.inscripciones) || [];
     const con = L.filter((x) => x.lugar).length;
-    $("#colEstado").textContent = con + " expositores · " + L.reduce((a, x) => a + x.integrantes.length, 0) + " estudiantes · " + L.filter((x) => x.enlace).length + " con repositorio";
+    $("#colEstado").textContent = con + " expositores · " + L.reduce((a, x) => a + x.integrantes.length, 0) + " estudiantes";
     const O = L.filter((x) => x.lugar).sort((a, b) => a.lugar - b.lugar);
     let h = "";
     O.forEach((x, k) => { if ((x.lugar > 16) !== (dia === 1)) return; const i = x.lugar;
