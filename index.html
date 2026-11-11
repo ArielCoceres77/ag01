@@ -5114,7 +5114,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   function guionPublicidad(x, n) {
     const p = perfil(x), h = p.holos, d = parteDe(x), pasos = (p.pasos || pasosAuto(p)).slice(0, 3);
     return { formato: "9:16", esc: p.esc, musica: "accion", max: 30, archivo: `publicidad-${slug(p.nombre)}`, beats: [
-      { v: "ag1", d: p.gancho, hud: { tipo: "gancho", txt: p.ganchoTxt }, holo: [h[0]], toma: "dolly", fx: "impacto", flash: .45, temblor: .5 },
+      { v: "ag1", d: p.gancho, intro: { lista: [...new Set([...h, "chip", "estrella"])].slice(0, 6).map((n) => ({ n })), logo: true }, hud: { tipo: "intro", palabras: [...p.palabras, ...p.palabras2], txt: p.ganchoTxt }, toma: "travelling", fx: "impacto", flash: .6, temblor: .5, glitch: true },
       { v: "ag1", d: `Es ${p.voz}, de ${listaY(p.cortos || p.integrantes)}.`, hud: { tipo: "integrantes" }, holo: ["logo"], toma: "travelling", fx: "whoosh", flash: .3 },
       { sting: true, t: .9, estudio: "entrar", glitch: true, fx: "impacto", hud: { tipo: "sting", txt: "¿CÓMO FUNCIONA?", sub: "EXPLICADO EN 3 PASOS" } },
       ...pasos.map((s, i) => ({ v: "locutor", d: s[2], estudio: { paso: i }, hud: { tipo: "estudio", paso: i, n: pasos.length }, fx: "whoosh", opcional: i === 2 })),
@@ -5126,7 +5126,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   function guionTodos(lista) {
     const n = lista.length, uno = parteDe({ lugar: 1 }), dos = parteDe({ lugar: 17 });
     return { formato: "9:16", esc: "rfa", musica: "accion", max: 30, archivo: "publicidad-coloquio-final-los-proyectos", todos: true, lista, beats: [
-      { v: "ag1", d: `¡${n === 10 ? "Diez" : n} proyectos con inteligencia artificial, hechos en El Colorado!`, esc: "rfa", hud: { tipo: "gancho", txt: `${n} PROYECTOS · 1 PUEBLO` }, holo: ["chip", "estrella"], toma: "travelling", fx: "impacto", flash: .45, temblor: .5 },
+      { v: "ag1", d: `¡${n === 10 ? "Diez" : n} proyectos con inteligencia artificial, hechos en El Colorado!`, esc: "rfa", minT: 5, intro: { lista: lista.slice(0, 8).map((x) => ({ n: perfil(x).holos[0], c: perfil(x).color })) }, hud: { tipo: "intro", palabras: ["HUERTAS", "RADIO", "DENGUE", "CIENCIA 3D", "JUEGOS", "CINE CON IA"], txt: `${n} PROYECTOS · 1 PUEBLO` }, toma: "travelling", fx: "impacto", flash: .6, temblor: .5, glitch: true },
       { sting: true, t: .9, estudio: "entrarTodos", glitch: true, fx: "impacto", hud: { tipo: "sting", txt: "MIRÁ LO QUE CREAMOS", sub: "COLOQUIO FINAL · AUXILIAR EN IA" } },
       { v: "locutor", d: "Huertas con inteligencia artificial, radios comunitarias, mapas contra el dengue, ciencia en 3D…", estudio: { carrusel: 0 }, hud: { tipo: "estudioTodos" }, fx: "whoosh" },
       { v: "locutor", d: "juegos, trámites claros y cine con IA. ¡Todo hecho acá!", estudio: { carrusel: 1 }, hud: { tipo: "estudioTodos" }, fx: "whoosh" },
@@ -5340,6 +5340,12 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     g.userData.anim = (t) => { aro.rotation.z = t * .8; const r = g.children[0]; r.position.y = .2 + h / 2 + Math.sin(t * 1.6) * .04; r.rotation.y = Math.sin(t * 1.1) * .45; r.traverse((o) => { if (o.material?.uniforms?.uFrente) o.material.uniforms.uT.value = t; }); };
     g.userData.logo = true; return g;
   }
+  /* intro: tornado holográfico de los modelos del proyecto alrededor de AG1 */
+  function introHolo(o) {
+    const t0 = C().vt.elapsedTime, n = o.lista.length;
+    o.lista.forEach((m, i) => { const it = agregar(m.n, "arriba", { color: m.c, esc: .3 }); if (it) it.userData.ring = { i, n, t0 }; });
+    if (o.logo) setTimeout(() => { if (rodando && !C().zt.cancelado) { const lg = agregar("logo", "arriba", { esc: .5 }); if (lg) lg.userData.pulso = C().vt.elapsedTime; } }, 1300);
+  }
   function textosOrbitando(palabras, col) {
     palabras.forEach((w, i) => { const it = agregar("texto", "arriba", { txt: w, color: i % 2 ? "#ffffff" : col, esc: .55, alto: .24 }); if (!it) return; it.userData.orbita = { i, n: palabras.length }; });
   }
@@ -5372,6 +5378,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       const pop = u.vis < 1 && !u.sale ? 1 + Math.sin(Math.min(1, u.vis) * Math.PI) * .18 : 1;
       const k = u.nombre === "texto" ? H.altura * .55 : u.k;
       if (u.fusion) { const f = Math.min(1, (t - u.fusion.t0) / 1.1), ee = f * f * (3 - 2 * f); it.position.lerpVectors(u.fusion.de, u.fusion.a, ee); it.scale.setScalar(k * (1 - ee * .9)); if (f >= 1 && !u.sale) { u.sale = true; u.vis = Math.min(u.vis, .5); } }
+      else if (u.ring) { const e2 = t - u.ring.t0, a = e2 * 2.1 + u.ring.i / u.ring.n * Math.PI * 2, rad = H.altura * (.95 - .38 * Math.min(1, e2 / 4)), w = c.kr.formato === "9:16" ? .62 : 1;
+        it.position.set(Math.cos(a) * rad * w, H.altura * (.12 + (u.ring.i % 3) * .26 + .08 * Math.sin(e2 * 2.4 + u.ring.i)), H.altura * .3 + Math.sin(a) * rad * .55); it.scale.setScalar(k * 1.1 * pop * (.85 + .15 * Math.sin(e2 * 3 + u.ring.i))); }
       else if (u.orbita) { const a = t * .7 + u.orbita.i / u.orbita.n * Math.PI * 2; const w = c.kr.formato === "9:16" ? .38 : .6; it.position.set(Math.cos(a) * H.altura * w, H.altura * (.72 + .08 * Math.sin(t * 1.5 + u.orbita.i)), H.altura * .3 + Math.sin(a) * H.altura * .3); it.scale.setScalar(k * .7 * pop); }
       else if (u.fila) { const ancho = c.kr.formato === "9:16" ? .62 : 1; it.position.set(ancho < 1 ? 0 : -H.altura * .45, H.altura * (.95 - u.fila.i * .14), H.altura * .5); it.scale.setScalar(k * .62 * pop); }
       else { it.position.copy(u.objetivo); it.position.y += Math.sin(t * 1.2 + u.fase) * H.altura * .025; it.scale.setScalar((u.nombre === "titulo" ? H.altura * .4 : k) * pop); }
@@ -5386,6 +5394,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       it.visible = !(u.vis < .9 && !u.sale && Math.random() < .12);
     }
     if (H.hud || H.glitchT != null) window.CINE.ov.sucio = true;
+    // fin del gancho holográfico (5 s): todo se funde en el logo
+    if (H.introFin != null && t >= H.introFin) { H.introFin = null; if (H.items.some((it) => it.userData.ring && !it.userData.sale)) { fusion(); window.CINE.efectos.flash = .5; try { c.Ne.efecto("impacto"); } catch {} } }
   }
 
   /* =====================================================================
@@ -5607,9 +5617,24 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   const easeBack = (n) => { n = Math.max(0, Math.min(1, n)); const e = 1.70158; return 1 + (e + 1) * Math.pow(n - 1, 3) + e * Math.pow(n - 1, 2); };
   window.__ovExtra = (ctx, W, Hh, t) => {
     if (!H || !H.hud) return;
+    const PAL = .34;
+    if (H.hud.tipo === "intro" && t - H.hud.t0 > H.hud.palabras.length * PAL) H.hud = { tipo: "gancho", txt: H.hud.txt, t0: H.hud.t0 + H.hud.palabras.length * PAL };
     const hud = H.hud, e = t - hud.t0, vert = Hh > W, L = Math.min(W, Hh), p = H.perfil || {}, col = p.color || "#67E8F9";
     ctx.save(); ctx.textBaseline = "alphabetic";
-    if (hud.tipo === "gancho") {
+    if (hud.tipo === "intro") {
+      // líneas de escaneo y marco de visor holográfico
+      ctx.save(); ctx.globalAlpha = .16; ctx.fillStyle = col; for (let yy = (e * 140) % 9; yy < Hh; yy += 9) ctx.fillRect(0, yy, W, 1.4);
+      ctx.globalAlpha = .9; ctx.strokeStyle = col; ctx.lineWidth = L * .006; const m = L * .05, q = L * .09;
+      [[m, m, 1, 1], [W - m, m, -1, 1], [m, Hh - m, 1, -1], [W - m, Hh - m, -1, -1]].forEach(([x, y, sx, sy]) => { ctx.beginPath(); ctx.moveTo(x, y + sy * q); ctx.lineTo(x, y); ctx.lineTo(x + sx * q, y); ctx.stroke(); });
+      ctx.font = `800 ${L * .026}px ${FUENTE_X}`; ctx.fillStyle = col; ctx.textAlign = "left"; ctx.globalAlpha = .5 + .5 * (Math.sin(e * 12) > 0); ctx.fillText("● HOLO · COLOQUIO FINAL", m + L * .02, m + L * .045); ctx.restore();
+      const i = Math.min(hud.palabras.length - 1, Math.floor(e / PAL)), f = (e - i * PAL) / PAL, w = hud.palabras[i], tam = L * (vert ? .12 : .09);
+      const s = 1.5 - .5 * easeBack(Math.min(1, f / .4));
+      ctx.save(); ctx.translate(W / 2, vert ? Hh * .27 : Hh * .3); ctx.scale(s, s); ctx.font = `900 ${tam}px ${FUENTE_T}`; ctx.textAlign = "center";
+      let tt = tam; while (ctx.measureText(w).width > W * .88 / s && tt > 20) { tt -= 4; ctx.font = `900 ${tt}px ${FUENTE_T}`; }
+      ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = .7; const d = tt * .05 * (1 - f); ctx.fillStyle = "#ff2a55"; ctx.fillText(w, -d - 3, 0); ctx.fillStyle = "#22e6ff"; ctx.fillText(w, d + 3, 0);
+      ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; texto3D(ctx, w, 0, 0, tt, i % 2 ? "#ffffff" : col); ctx.restore();
+      if (f < .18) { ctx.fillStyle = `rgba(255,255,255,${(.18 - f) * 1.6})`; ctx.fillRect(0, 0, W, Hh); }
+    } else if (hud.tipo === "gancho") {
       const s = e < .35 ? 2.2 - 1.2 * easeBack(e / .35) : 1 + .025 * Math.sin(e * 10), y = vert ? Hh * .2 : Hh * .2;
       ctx.translate(W / 2, y); ctx.scale(s, s); ctx.rotate(Math.sin(e * 18) * (e < .5 ? .03 : .006));
       ctx.font = `900 ${L * (vert ? .085 : .065)}px ${FUENTE_T}`; const lin = cortarLineas(ctx, hud.txt, W * .84).slice(0, 3), tam = L * (vert ? .085 : .065);
@@ -5715,7 +5740,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       const lineas = new Map();
       const prep = async (bs) => { const ls = bs.filter((b) => b.d).map((b) => { const l = { tipo: "linea", k: b.v || "ag1", texto: b.d }; lineas.set(b, l); return l; }); return c.Rg(ls, motor, clave, (i, n) => nota(`Preparando voces ${i} de ${n}…`)); };
       let voces = await prep(beats);
-      const dur = (bs) => bs.reduce((s, b) => s + (b.d ? ((voces.get(lineas.get(b))?.duration) || c.Q3(b.v || "ag1", b.d)) + (b.rapido ? .45 : (guion.max ? .22 : .35)) : (b.t || 1.5)), 0) + 1.2;
+      const dur = (bs) => bs.reduce((s, b) => s + Math.max(b.minT || 0, b.d ? ((voces.get(lineas.get(b))?.duration) || c.Q3(b.v || "ag1", b.d)) + (b.rapido ? .45 : (guion.max ? .22 : .35)) : (b.t || 1.5)), 0) + 1.2;
       if (guion.max && dur(beats) > guion.max - .5) {
         beats = beats.filter((b) => !b.opcional);
         if (dur(beats) > guion.max - .5 && guion.todos) { beats.forEach((b) => { if (b.corto) b.d = b.corto; }); voces = await prep(beats); }
@@ -5762,12 +5787,15 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
           if (hname === "fusion") { setTimeout(fusion, b.d ? 1500 : 200); continue; }
           if (hname === "nombres") { limpiarTipo("texto"); nombresHolo(H.perfil.integrantes, H.perfil.color); continue; }
           if (hname === "palabras" || hname === "palabras2") { limpiarTipo("texto"); textosOrbitando(b.palabras || [], H.perfil.color); continue; }
-          if (hname === "logo") { agregar("logo", guion.formato === "9:16" ? "arriba" : "arribaDer", { esc: .42 }); continue; }
+          if (hname === "logo") { if (H.items.some((it) => it.userData.nombre === "logo" && !it.userData.sale)) continue; agregar("logo", guion.formato === "9:16" ? "arriba" : "arribaDer", { esc: .42 }); continue; }
           if (hname === "titulo") { agregar("titulo", guion.formato === "9:16" ? "abajo" : "arribaIzq"); continue; }
           rotarModelos(); agregar(hname, LUGARES[lugar++ % LUGARES.length]);
         }
+        const tB = c.vt.elapsedTime;
+        if (b.intro && !(E && E.activo)) { introHolo(b.intro); c.Ne.efecto("whoosh"); H.introFin = c.vt.elapsedTime + 5; }
         if (b.d) await c.kg(lineas.get(b), motor, voces, b.rapido ? .15 : .3);
         else await c.yn(b.t || 1.5);
+        if (b.minT && !c.zt.cancelado) { const r = b.minT - (c.vt.elapsedTime - tB); if (r > .05) await c.yn(r); }
       }
       if (!c.zt.cancelado) { fusion(); window.CINE.efectos.flash = .35; c.Ne.efecto("placa"); if (conTema) musicaStop(false, 1.4); await c.yn(guion.max ? Math.max(.8, Math.min(2.4, guion.max - .6 - (c.vt.elapsedTime - tIni - pausa))) : 2.4); }
       c.Ne.ponerMusica("silencio"); window.CINE.director.bloqueo = 0; estudioFuera();
@@ -5779,14 +5807,14 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       else nota("Detenido.");
       try { if (c.zt.on && grabar) await c.zg(guion.archivo); } catch {}
     } finally {
-      limpiar(); hud(null); estudioFuera(); musicaStop(true); if (H) H.glitchT = null; window.__sinNombre = false; window.__subY = 0;
+      limpiar(); hud(null); estudioFuera(); musicaStop(true); if (H) { H.glitchT = null; H.introFin = null; } window.__sinNombre = false; window.__subY = 0;
       try { window.CINE.ov.progreso = null; window.CINE.ov.estilo = "cine"; c.$1(false); } catch {}
       c.zt.on = false; c.qs(); rodando = false; document.body.classList.remove("colq-rodando"); botones();
       if (kitFin) { const k = kitFin; kitFin = null; mostrarKit(k, { titulo: "Para el Instagram de IA El Colorado · " + (guion.todos ? "los proyectos" : H?.perfil?.nombre || "") }); }
     }
   }
   function limpiarTipo(n) { H.items.filter((it) => it.userData.nombre === n).forEach((it) => { it.userData.sale = true; }); }
-  function rotarModelos() { const mods = H.items.filter((it) => !["logo", "titulo", "texto"].includes(it.userData.nombre) && !it.userData.sale); if (mods.length >= 3) mods[0].userData.sale = true; }
+  function rotarModelos() { const mods = H.items.filter((it) => !["logo", "titulo", "texto"].includes(it.userData.nombre) && !it.userData.sale && !it.userData.ring); if (mods.length >= 3) mods[0].userData.sale = true; }
 
   /* =====================================================================
      DATOS de la planilla del coloquio
@@ -6198,6 +6226,9 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   window.__coloquioShow = { estudioProyecto, estudioTodos, estudioPaso, estudioFuera, musicaPub, musicaStop, estudio: () => E, medir: () => { holoInit(); medirAG1(); }, preparar: async (id) => { holoInit(); const x = L2().find((i) => i.id === id); H.x = x; H.perfil = perfil(x); await cargarLogo(x); }, rodar, kitIG, mostrarKit, hacerFlyer, flyerProyecto, flyerGrupo, guionColoquio, guionPublicidad, guionTodos, agregar, fusion, limpiar, hud, perfil, datos: () => datos, MODELOS: () => Object.keys(MODELOS), holo: () => H };
 })();
 </script>
+
+
+
 
 
 
