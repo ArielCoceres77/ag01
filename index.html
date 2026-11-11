@@ -5862,6 +5862,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
         `📍 ${LUGAR_TXT}`,
         "",
         "🚀 ¡No te lo pierdas! Te esperamos. 💛",
+        "📲 Seguinos en @ia_el_colorado26",
       ].join("\n");
       const palabras = [p.nombre, ...p.palabras.map(capital), ...p.palabras2.map(capital), "inteligencia artificial", "Coloquio Final", "El Colorado", "Formosa", "educación", "proyectos estudiantiles"];
       const ht = [aHashtag(p.nombre), ...p.palabras.slice(0, 2).map(aHashtag), ...HT_BASE];
@@ -5883,6 +5884,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       `📍 ${LUGAR_TXT}`,
       "",
       "🚀 ¡No te lo pierdas! Vení a ver lo que creamos. 💛",
+      "📲 Seguinos en @ia_el_colorado26",
     ].join("\n");
     const palabras = ["Coloquio Final", "inteligencia artificial", "El Colorado", "Formosa", "Auxiliar en IA", "proyectos estudiantiles", "educación", "tecnología", ...de.map((y) => perfil(y).nombre)];
     const ht = [...HT_BASE, ...de.slice(0, 10).map((y) => aHashtag(perfil(y).nombre))];
@@ -5966,7 +5968,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   }
   function pieFlyer(ctx) {
     texto3D(ctx, "¡NO TE LO PIERDAS!", FW / 2, FH - 150, 92, "#FDE047");
-    ctx.font = `800 34px ${FUENTE_X}`; ctx.textAlign = "center"; ctx.fillStyle = "#e6f3ff"; ctx.fillText("IA El Colorado · El Colorado, Formosa", FW / 2, FH - 70);
+    ctx.font = `800 34px ${FUENTE_X}`; ctx.textAlign = "center"; ctx.fillStyle = "#e6f3ff"; ctx.fillText("Seguinos en Instagram: @ia_el_colorado26", FW / 2, FH - 70);
   }
   async function flyerProyecto(x) {
     const p = perfil(x), d = parteDe(x), n = numero(x), L = await logoListo(x.id);
@@ -6107,6 +6109,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   window.__coloquioShow = { estudioProyecto, estudioTodos, estudioPaso, estudioFuera, musicaPub, musicaStop, estudio: () => E, medir: () => { holoInit(); medirAG1(); }, preparar: async (id) => { holoInit(); const x = L2().find((i) => i.id === id); H.x = x; H.perfil = perfil(x); await cargarLogo(x); }, rodar, kitIG, mostrarKit, hacerFlyer, flyerProyecto, flyerGrupo, guionColoquio, guionPublicidad, guionTodos, agregar, fusion, limpiar, hud, perfil, datos: () => datos, MODELOS: () => Object.keys(MODELOS), holo: () => H };
 })();
 </script>
+
 
 
 
