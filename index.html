@@ -4903,16 +4903,17 @@ body.modo-coloquio #coloquioPanel{display:flex}
     const L = (datos && datos.inscripciones) || [];
     const con = L.filter((x) => x.lugar).sort((a, b) => a.lugar - b.lugar), sin = L.filter((x) => !x.lugar);
     const alumnos = L.reduce((a, x) => a + x.integrantes.length, 0);
-    const linea = (x) => "«" + x.nombreProyecto + "» de " + x.integrantes.join(", ") + " (" + (x.modalidad === "Individual" ? "individual" : "grupo de " + x.integrantes.length) + "); " + proy(x) + ". Objetivos: " + String(x.descripcion).slice(0, 280) + ". Herramientas: " + x.herramientas + ".";
+    const ord = new Map(con.map((x, i) => [x.id, i + 1]));
+    const linea = (x) => "«" + x.nombreProyecto + "» de " + x.integrantes.join(", ") + " (" + (x.modalidad === "Individual" ? "individual" : "grupo de " + x.integrantes.length) + "); " + proy(x) + ". Objetivos: " + String(x.descripcion).slice(0, 280) + ". Herramientas: " + x.herramientas + "." + (x.enlace ? " Repositorio: " + x.enlace + "." : "");
     let s = "NOVEDADES DEL COLOQUIO FINAL del Auxiliar en IA, datos reales de la planilla de inscripción (actualizado " + hora(Date.now()) + " h). ";
     s += "Se expone en dos jornadas: martes 17 de noviembre (lugares 1 al 16) y martes 24 de noviembre (lugares 17 al 32). Cada lugar es un proyecto, individual o de 2 o 3 estudiantes. ";
     s += "Estado: " + estadoTxt() + ". Hay " + L.length + " proyectos inscriptos de 32 lugares, con " + alumnos + " estudiantes. ";
-    if (con.length) s += "ORDEN DE EXPOSICIÓN SORTEADO: " + con.map((x) => "Lugar " + x.lugar + " (" + DIAS[x.lugar <= 16 ? 0 : 1] + "): " + linea(x)).join(" ") + " ";
+    if (con.length) s += "ORDEN DE EXPOSICIÓN (numerado del 1 al " + con.length + "): " + con.map((x) => "Expositor N.º " + ord.get(x.id) + " (" + DIAS[x.lugar <= 16 ? 0 : 1] + "): " + linea(x)).join(" ") + " ";
     if (sin.length) s += "INSCRIPTOS SIN LUGAR TODAVÍA (falta el sorteo): " + sin.map(linea).join(" ") + " ";
     const tom = new Set(L.map((x) => x.proyectoNum).filter(Boolean)), libres = []; for (let i = 1; i <= 30; i++) if (!tom.has(i)) libres.push(i);
     s += "Proyectos de la lista de 30 que siguen libres: " + (libres.length ? libres.join(", ") : "ninguno") + ". ";
     s += "Usá solo estos datos sobre el coloquio y no inventes inscriptos, lugares ni fechas. ";
-    if (document.body.classList.contains("modo-coloquio")) s += "AHORA ESTÁS EN MODO COLOQUIO FINAL: sos el presentador. Cuando te pidan presentar un lugar, decí el número, el nombre del proyecto y a sus integrantes, contá en una o dos frases de qué se trata, invitalos a empezar y al terminar hacé una pregunta ética como en la clase 7: quién es responsable, qué datos usa y qué riesgos tiene.";
+    if (document.body.classList.contains("modo-coloquio")) s += "AHORA ESTÁS EN MODO COLOQUIO FINAL: sos el presentador. Cuando te pidan presentar a un expositor, decí su número de orden, el nombre del proyecto y a sus integrantes, contá en una o dos frases de qué se trata, invitalos a empezar y al terminar hacé una pregunta ética como en la clase 7: quién es responsable, qué datos usa y qué riesgos tiene.";
     return s;
   }
   function contarle(forzar) {
@@ -4925,26 +4926,28 @@ body.modo-coloquio #coloquioPanel{display:flex}
   function pintar() {
     const L = (datos && datos.inscripciones) || [];
     const con = L.filter((x) => x.lugar).length;
-    $("#colEstado").textContent = L.length + " de 32 lugares ocupados · " + con + " sorteados · " + estadoTxt().replace(/^la /, "");
-    const desde = dia ? 17 : 1, por = new Map(L.filter((x) => x.lugar).map((x) => [x.lugar, x]));
+    $("#colEstado").textContent = con + " expositores · " + L.reduce((a, x) => a + x.integrantes.length, 0) + " estudiantes · " + L.filter((x) => x.enlace).length + " con repositorio";
+    const O = L.filter((x) => x.lugar).sort((a, b) => a.lugar - b.lugar);
     let h = "";
-    for (let i = desde; i < desde + 16; i++) { const x = por.get(i); if (!x) continue;
-      h += `<li><button type="button" data-l="${i}" aria-current="${i === actual}"><span class="n">${i}</span><span><b>${esc(x.nombreProyecto)}</b><small>${esc(x.integrantes.join(" · "))}</small></span></button></li>`; }
+    O.forEach((x, k) => { if ((x.lugar > 16) !== (dia === 1)) return; const i = x.lugar;
+      h += `<li><button type="button" data-l="${i}" aria-current="${i === actual}"><span class="n">${k + 1}</span><span><b>${esc(x.nombreProyecto)}</b><small>${esc(x.integrantes.join(" · "))}</small></span></button></li>`; });
     $("#colLista").innerHTML = h || `<li style="color:#b9c7bf;padding:6px">Todavía no hay lugares sorteados para este martes.</li>`;
   }
+  const L2 = () => (datos && datos.inscripciones) || [];
   function presentar(l) {
     const x = ((datos && datos.inscripciones) || []).find((i) => i.lugar === l);
     if (!x) return;
     actual = l; pintar();
     if (!conv) { $("#colNota").textContent = "Primero empezá la charla en vivo con AG1 y después tocá el expositor."; return; }
     $("#colNota").textContent = "";
-    try { contarle(); conv.sendUserMessage("Presentá al lugar " + l + " del coloquio: «" + x.nombreProyecto + "», de " + x.integrantes.join(", ") + "."); }
+    const n = L2().filter((i) => i.lugar).sort((a, b) => a.lugar - b.lugar).findIndex((i) => i.id === x.id) + 1;
+    try { contarle(); conv.sendUserMessage("Presentá al expositor N.º " + n + " del coloquio: «" + x.nombreProyecto + "», de " + x.integrantes.join(", ") + "."); }
     catch (e) { $("#colNota").textContent = "AG1 no está conectado. Volvé a empezar la charla en vivo."; conv = null; }
   }
   $("#colLista").addEventListener("click", (e) => { const b = e.target.closest("button[data-l]"); if (b) presentar(Number(b.dataset.l)); });
   $("#colSig").addEventListener("click", () => {
     const ls = ((datos && datos.inscripciones) || []).map((x) => x.lugar).filter(Boolean).sort((a, b) => a - b);
-    const sig = ls.find((l) => l > actual); if (!sig) { $("#colNota").textContent = ls.length ? "Ya se presentaron todos los lugares sorteados." : "Todavía no hay lugares sorteados."; return; }
+    const sig = ls.find((l) => l > actual); if (!sig) { $("#colNota").textContent = ls.length ? "Ya se presentaron todos los expositores." : "Todavía no hay lugares sorteados."; return; }
     if ((sig > 16) !== (dia === 1)) { dia = sig > 16 ? 1 : 0; document.querySelectorAll("#coloquioPanel .dias button").forEach((b) => b.setAttribute("aria-pressed", String(Number(b.dataset.d) === dia))); }
     presentar(sig);
   });
