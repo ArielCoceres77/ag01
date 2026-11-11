@@ -5856,8 +5856,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
         "",
         `👥 ${p.integrantes.length > 1 ? "Lo presentan" : "Lo presenta"}: ${listaY(p.integrantes)}${n ? ` (expositor N.º ${n})` : ""}.`,
         "",
-        `🎓 Coloquio Final del Auxiliar en Inteligencia Artificial · ${d.parte}`,
-        `📅 ${capital(d.fecha)}`,
+        "🎓 Coloquio Final del Auxiliar en Inteligencia Artificial",
+        `📅 ${d.fecha.replace(/^./, (c) => c.toUpperCase())}`,
         "🕡 Desde las 18:30 h",
         `📍 ${LUGAR_TXT}`,
         "",
@@ -5872,8 +5872,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     const lista = ordenados(), dias = tipo === "dia1" ? [0] : tipo === "dia2" ? [1] : [0, 1];
     const de = lista.filter((y) => dias.includes(y.lugar > 16 ? 1 : 0));
     const items = de.map((y) => { const p = perfil(y); return `${(p.pasos && p.pasos[0][0]) || "🤖"} ${p.nombre}: ${p.tag}.`; });
-    const fechas = dias.map((i) => { const d = parteDe({ lugar: i ? 17 : 1 }); return `📅 ${d.parte}: ${d.fecha}`; });
-    const titulo = tipo === "general" ? `🎓 Coloquio Final: ${de.length} proyectos con IA hechos en El Colorado 🚀` : `🎓 Coloquio Final · ${parteDe({ lugar: tipo === "dia2" ? 17 : 1 }).parte}: ${de.length} proyectos con IA 🚀`;
+    const fechas = dias.map((i) => { const d = parteDe({ lugar: i ? 17 : 1 }); return `📅 ${d.fecha.replace(/^./, (c) => c.toUpperCase())}`; });
+    const titulo = tipo === "general" ? `🎓 Coloquio Final: ${de.length} proyectos con IA hechos en El Colorado 🚀` : `🎓 Coloquio Final · ${parteDe({ lugar: tipo === "dia2" ? 17 : 1 }).fecha.replace(/^./, (c) => c.toUpperCase())}: ${de.length} proyectos con IA 🚀`;
     const descripcion = [
       tipo === "general" ? `🔥 ${de.length} proyectos con inteligencia artificial, hechos por estudiantes de El Colorado.` : `🔥 ${de.length} proyectos con inteligencia artificial en una sola noche.`,
       "",
@@ -5919,8 +5919,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
      FLYERS 9:16 (1080×1920) con fondo 3D real, ganchos y logos en relieve
      ===================================================================== */
   const FW = 1080, FH = 1920;
-  const GANCHO_DIA = ["¡5 PROYECTOS CON IA EN UNA NOCHE!", "¡LA SEGUNDA NOCHE VIENE CON TODO!"];
-  function capturaFrame() {
+    function capturaFrame() {
     // se registra después del bucle de la app: corre tras su render, con el búfer todavía lleno
     return new Promise((ok) => setTimeout(() => requestAnimationFrame(() => { const src = C().nr.domElement, cv = document.createElement("canvas"); cv.width = src.width; cv.height = src.height; cv.getContext("2d").drawImage(src, 0, 0); ok(cv); }), 0));
   }
@@ -5941,83 +5940,171 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     limpiar(); window.CINE.director.bloqueo = 0;
     return cv;
   }
-  function cubrir(ctx, img, W, Hh) { const k = Math.max(W / img.width, Hh / img.height), w = img.width * k, h = img.height * k; ctx.drawImage(img, (W - w) / 2, (Hh - h) / 2, w, h); }
+  function cubrir(ctx, img, W, Hh, zoom = 1) { const k = Math.max(W / img.width, Hh / img.height) * zoom, w = img.width * k, h = img.height * k; ctx.drawImage(img, (W - w) / 2, (Hh - h) / 2, w, h); }
   function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-  function ganchoFlyer(ctx, txt, y, col) {
-    let tam = 128, ls; do { ctx.font = `900 ${tam}px ${FUENTE_T}`; ls = cortarLineas(ctx, txt, FW - 120); tam -= 6; } while ((ls.length > 3 || ls.some((l) => ctx.measureText(l).width > FW - 90)) && tam > 60);
-    tam += 6; ls.forEach((l, i) => texto3D(ctx, l, FW / 2, y + i * tam * 1.04, tam, i === ls.length - 1 ? col : "#ffffff"));
-    return y + (ls.length - 1) * tam * 1.04;
+  const espaciado = (ctx, px) => { try { ctx.letterSpacing = px + "px"; } catch {} };
+  const ajustarFuente = (ctx, txt, tam, peso, fuente, max, min = 16) => { do { ctx.font = `${peso} ${tam}px ${fuente}`; if (ctx.measureText(txt).width <= max) break; tam -= 2; } while (tam > min); return tam; };
+  const hexA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+  let GRANO = null;
+  function grano(ctx) {
+    if (!GRANO) { const c = document.createElement("canvas"); c.width = c.height = 256; const x = c.getContext("2d"), d = x.createImageData(256, 256); for (let i = 0; i < d.data.length; i += 4) { const v = Math.random() * 255; d.data[i] = d.data[i + 1] = d.data[i + 2] = v; d.data[i + 3] = 20; } x.putImageData(d, 0, 0); GRANO = c; }
+    ctx.save(); ctx.globalCompositeOperation = "overlay"; ctx.fillStyle = ctx.createPattern(GRANO, "repeat"); ctx.fillRect(0, 0, FW, FH); ctx.restore();
   }
-  const altoFecha = (n) => 70 + n * 56 + 150;
-  function bloqueFecha(ctx, partes, y) {
-    const h = altoFecha(partes.length), x0 = 60, w = FW - 120;
-    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 30; ctx.shadowOffsetY = 12; rr(ctx, x0, y, w, h, 34); ctx.fillStyle = "rgba(6,12,28,.88)"; ctx.fill(); ctx.restore();
-    rr(ctx, x0, y, w, h, 34); ctx.lineWidth = 6; ctx.strokeStyle = "#C9A227"; ctx.stroke();
-    ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
-    const ajustar = (txt, tam, peso, fuente) => { do { ctx.font = `${peso} ${tam}px ${fuente}`; tam -= 2; } while (ctx.measureText(txt).width > w - 70 && tam > 18); };
-    let yy = y + 72; partes.forEach((d) => { const t = `${d.parte.toUpperCase()} · ${d.Fecha}`; ajustar(t, 42, 900, FUENTE_X); ctx.fillStyle = "#FDE047"; ctx.fillText(t, FW / 2, yy); yy += 56; });
-    texto3D(ctx, "DESDE LAS 18:30 HS", FW / 2, yy + 46, 70, "#ffffff");
-    const lug = "ISFD y T «República Federal de Alemania» · El Colorado"; ajustar(lug, 32, 800, FUENTE_X); ctx.fillStyle = "#cfe8ff"; ctx.fillText(lug, FW / 2, yy + 104);
+  /* título metálico dorado con extrusión */
+  function metal(ctx, txt, x, y, tam, o = {}) {
+    const fuente = o.fuente || FUENTE_T, prof = o.prof ?? Math.round(tam * .07);
+    ctx.save(); ctx.font = `900 ${tam}px ${fuente}`; ctx.textAlign = o.align || "center"; ctx.textBaseline = "alphabetic"; ctx.lineJoin = "round"; espaciado(ctx, o.esp || 0);
+    ctx.shadowColor = "rgba(0,0,0,.7)"; ctx.shadowBlur = tam * .35; ctx.shadowOffsetY = tam * .12; ctx.fillStyle = "#2a1a02"; ctx.fillText(txt, x, y + prof); ctx.shadowColor = "transparent";
+    for (let i = prof; i > 0; i--) { ctx.fillStyle = i > prof * .5 ? "#3d2604" : "#7a5208"; ctx.fillText(txt, x, y + i); }
+    const top = y - tam * .78, g = ctx.createLinearGradient(0, top, 0, y + tam * .05);
+    (o.colores || [["0", "#fffbe0"], [".38", "#ffd94a"], [".5", "#e0a514"], [".62", "#ffe680"], ["1", "#b9800c"]]).forEach(([s, c]) => g.addColorStop(+s, c));
+    ctx.lineWidth = Math.max(2, tam * .045); ctx.strokeStyle = o.borde || "#4a2f04"; ctx.strokeText(txt, x, y);
+    ctx.fillStyle = g; ctx.fillText(txt, x, y);
+    ctx.restore();
+  }
+  const PLATA = [["0", "#ffffff"], [".45", "#f1f5ff"], [".55", "#b8c4dc"], [".7", "#eef3ff"], ["1", "#9aa8c4"]];
+  function halo(ctx, x, y, r, col, a = .55) { const g = ctx.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, hexA(col, a)); g.addColorStop(.45, hexA(col, a * .35)); g.addColorStop(1, hexA(col, 0)); ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2); }
+  function cristal(ctx, x, y, w, h, r, col, a = .62) {
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = 34; ctx.shadowOffsetY = 14; rr(ctx, x, y, w, h, r); ctx.fillStyle = `rgba(7,12,26,${a})`; ctx.fill(); ctx.restore();
+    ctx.save(); rr(ctx, x, y, w, h, r); ctx.clip(); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, "rgba(255,255,255,.12)"); g.addColorStop(.35, "rgba(255,255,255,0)"); ctx.fillStyle = g; ctx.fillRect(x, y, w, h); ctx.restore();
+    rr(ctx, x + .5, y + .5, w - 1, h - 1, r); const b = ctx.createLinearGradient(x, y, x + w, y + h); b.addColorStop(0, hexA(col, .95)); b.addColorStop(.5, "rgba(255,255,255,.18)"); b.addColorStop(1, hexA(col, .6)); ctx.lineWidth = 2.5; ctx.strokeStyle = b; ctx.stroke();
+  }
+  /* fondo: escena 3D graduada, viñeta, luces y grano */
+  function fondo(ctx, bg, col) {
+    ctx.fillStyle = "#050913"; ctx.fillRect(0, 0, FW, FH);
+    if (bg) { ctx.save(); ctx.filter = "saturate(1.25) contrast(1.08) brightness(.92)"; cubrir(ctx, bg, FW, FH, 1.04); ctx.restore(); }
+    ctx.save(); ctx.globalCompositeOperation = "soft-light"; ctx.fillStyle = hexA(col, .55); ctx.fillRect(0, 0, FW, FH); ctx.restore();
+    let g = ctx.createLinearGradient(0, 0, 0, FH); g.addColorStop(0, "rgba(3,6,15,.96)"); g.addColorStop(.2, "rgba(3,6,15,.72)"); g.addColorStop(.33, "rgba(3,6,15,.1)"); g.addColorStop(.52, "rgba(3,6,15,.05)"); g.addColorStop(.64, "rgba(3,6,15,.82)"); g.addColorStop(1, "rgba(3,6,15,.98)"); ctx.fillStyle = g; ctx.fillRect(0, 0, FW, FH);
+    g = ctx.createRadialGradient(FW / 2, FH * .45, FH * .2, FW / 2, FH * .45, FH * .75); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.65)"); ctx.fillStyle = g; ctx.fillRect(0, 0, FW, FH);
+    // haces de luz diagonales
+    ctx.save(); ctx.globalCompositeOperation = "lighter";
+    [[-.1, .1, 200], [.55, .07, 120], [.85, .05, 260]].forEach(([fx, a, w]) => { ctx.save(); ctx.translate(FW * fx, 0); ctx.rotate(.38); const l = ctx.createLinearGradient(-w / 2, 0, w / 2, 0); l.addColorStop(0, hexA(col, 0)); l.addColorStop(.5, hexA(col, a)); l.addColorStop(1, hexA(col, 0)); ctx.fillStyle = l; ctx.fillRect(-w / 2, -200, w, FH * 1.4); ctx.restore(); });
+    ctx.restore();
+    grano(ctx);
+    // marco fino
+    ctx.save(); ctx.strokeStyle = "rgba(255,217,74,.55)"; ctx.lineWidth = 2; rr(ctx, 28, 28, FW - 56, FH - 56, 26); ctx.stroke(); ctx.restore();
+  }
+  /* cabecera: marca + COLOQUIO FINAL */
+  function cabecera(ctx) {
+    ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.font = `800 26px ${FUENTE_X}`; espaciado(ctx, 9); ctx.fillText("IA EL COLORADO PRESENTA", FW / 2 + 4, 108);
+    const w = ctx.measureText("IA EL COLORADO PRESENTA").width; ctx.fillStyle = "#ffd94a"; ctx.fillRect(FW / 2 - w / 2 - 90, 99, 60, 3); ctx.fillRect(FW / 2 + w / 2 + 34, 99, 60, 3); ctx.restore();
+    const t = ajustarFuente(ctx, "COLOQUIO FINAL", 150, 900, FUENTE_T, FW - 130);
+    metal(ctx, "COLOQUIO FINAL", FW / 2, 112 + t * .98, t);
+    ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = "#e8eefc"; ctx.font = `700 25px ${FUENTE_X}`; espaciado(ctx, 7); ctx.fillText("AUXILIAR EN INTELIGENCIA ARTIFICIAL", FW / 2 + 3, 112 + t * .98 + 66); ctx.restore();
+    return 112 + t * .98 + 66;
+  }
+  /* gancho en franja inclinada */
+  function franja(ctx, txt, y, col) {
+    ctx.save(); const tam = ajustarFuente(ctx, txt, 62, 900, FUENTE_T, FW - 230, 34); ctx.font = `900 ${tam}px ${FUENTE_T}`; const w = ctx.measureText(txt).width + 90, h = tam * 1.5;
+    ctx.translate(FW / 2, y); ctx.rotate(-.035);
+    ctx.shadowColor = "rgba(0,0,0,.55)"; ctx.shadowBlur = 24; ctx.shadowOffsetY = 10;
+    ctx.beginPath(); ctx.moveTo(-w / 2 + 22, -h / 2); ctx.lineTo(w / 2, -h / 2); ctx.lineTo(w / 2 - 22, h / 2); ctx.lineTo(-w / 2, h / 2); ctx.closePath();
+    const g = ctx.createLinearGradient(-w / 2, 0, w / 2, 0); g.addColorStop(0, col); g.addColorStop(1, hexA(col, .8)); ctx.fillStyle = g; ctx.fill(); ctx.shadowColor = "transparent";
+    ctx.fillStyle = "rgba(255,255,255,.25)"; ctx.fillRect(-w / 2 + 14, -h / 2, w - 14, 4);
+    ctx.fillStyle = "#070b18"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, 0, tam * .06); ctx.restore();
+  }
+  /* entrada con la fecha */
+  function entrada(ctx, y, dias) {
+    const x0 = 60, w = FW - 120, h = 262, iz = 300;
+    ctx.save(); ctx.shadowColor = "rgba(0,0,0,.6)"; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16; rr(ctx, x0, y, w, h, 30); ctx.fillStyle = "rgba(8,13,28,.94)"; ctx.fill(); ctx.restore();
+    // talón dorado
+    ctx.save(); rr(ctx, x0, y, w, h, 30); ctx.clip(); const g = ctx.createLinearGradient(x0, y, x0 + iz, y + h); g.addColorStop(0, "#ffe680"); g.addColorStop(.5, "#e3a91a"); g.addColorStop(1, "#b37b0a"); ctx.fillStyle = g; ctx.fillRect(x0, y, iz, h); ctx.restore();
+    // perforación
+    ctx.save(); ctx.fillStyle = "#03060f"; [y, y + h].forEach((yy) => { ctx.beginPath(); ctx.arc(x0 + iz, yy, 20, 0, Math.PI * 2); ctx.fill(); }); ctx.setLineDash([10, 10]); ctx.strokeStyle = "rgba(255,217,74,.6)"; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(x0 + iz, y + 28); ctx.lineTo(x0 + iz, y + h - 28); ctx.stroke(); ctx.restore();
+    rr(ctx, x0, y, w, h, 30); ctx.lineWidth = 3; ctx.strokeStyle = "rgba(255,217,74,.8)"; ctx.stroke();
+    // talón: día
+    const cx = x0 + iz / 2; ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = "#2a1a02";
+    ctx.font = `900 30px ${FUENTE_X}`; espaciado(ctx, 8); ctx.fillText("MARTES", cx + 4, y + 54);
+    espaciado(ctx, 0); const num = dias.map((d) => d.n).join(" · "); const tn = ajustarFuente(ctx, num, 136, 900, FUENTE_T, iz - 40); ctx.font = `900 ${tn}px ${FUENTE_T}`; ctx.fillStyle = "#1a1002"; ctx.fillText(num, cx, y + h / 2 + tn * .38);
+    ctx.font = `900 28px ${FUENTE_X}`; espaciado(ctx, 6); ctx.fillText("NOVIEMBRE", cx + 3, y + h - 28); ctx.restore();
+    // cuerpo
+    const bx = x0 + iz + 40, bw = w - iz - 70;
+    ctx.save(); ctx.textAlign = "left"; ctx.fillStyle = "#ffd94a"; const fecha = dias.length > 1 ? "MARTES 17 Y MARTES 24 DE NOVIEMBRE" : `MARTES ${dias[0].n} DE NOVIEMBRE`;
+    ajustarFuente(ctx, fecha, 34, 900, FUENTE_X, bw); ctx.fillText(fecha, bx, y + 58);
+    ctx.fillStyle = "rgba(255,255,255,.7)"; ctx.font = `800 24px ${FUENTE_X}`; espaciado(ctx, 6); ctx.fillText("DESDE LAS", bx, y + 98); ctx.restore();
+    metal(ctx, "18:30 HS", bx, y + 178, 84, { align: "left", colores: PLATA, borde: "#1c2438", prof: 6 });
+    // ubicación con pin
+    ctx.save(); const py = y + 228; ctx.fillStyle = "#ffd94a"; ctx.beginPath(); ctx.arc(bx + 11, py - 14, 11, Math.PI, 0); ctx.lineTo(bx + 11, py + 6); ctx.closePath(); ctx.fill(); ctx.fillStyle = "#0b1020"; ctx.beginPath(); ctx.arc(bx + 11, py - 14, 4.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = "#e8eefc"; ctx.textAlign = "left"; const lug = "ISFD y T «República Federal de Alemania» · El Colorado"; ajustarFuente(ctx, lug, 25, 700, FUENTE_X, bw - 34); ctx.fillText(lug, bx + 34, py); ctx.restore();
     return y + h;
   }
-  function marcoFlyer(ctx, bg, col) {
-    ctx.fillStyle = "#04101a"; ctx.fillRect(0, 0, FW, FH); if (bg) cubrir(ctx, bg, FW, FH);
-    let g = ctx.createLinearGradient(0, 0, 0, FH * .42); g.addColorStop(0, "rgba(2,8,20,.92)"); g.addColorStop(.7, "rgba(2,8,20,.55)"); g.addColorStop(1, "rgba(2,8,20,0)"); ctx.fillStyle = g; ctx.fillRect(0, 0, FW, FH * .42);
-    g = ctx.createLinearGradient(0, FH * .48, 0, FH); g.addColorStop(0, "rgba(2,8,20,0)"); g.addColorStop(.3, "rgba(2,8,20,.78)"); g.addColorStop(1, "rgba(2,8,20,.97)"); ctx.fillStyle = g; ctx.fillRect(0, FH * .48, FW, FH * .52);
-    // bordes de color y franja superior
-    ctx.fillStyle = col; ctx.fillRect(0, 0, FW, 12); ctx.fillRect(0, FH - 12, FW, 12);
-    cartel(ctx, FW / 2, 84, "COLOQUIO FINAL · AUXILIAR EN IA", 38, "#C9A227", "#1c1400", FUENTE_X, -.015);
+  /* botón de llamada a la acción + redes */
+  function cierre(ctx) {
+    const y = FH - 250, w = 680, h = 104, x = FW / 2 - w / 2;
+    halo(ctx, FW / 2, y + h / 2, 420, "#ffd94a", .25);
+    ctx.save(); ctx.shadowColor = "rgba(255,190,40,.55)"; ctx.shadowBlur = 40; rr(ctx, x, y, w, h, h / 2); const g = ctx.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, "#fff1a6"); g.addColorStop(.5, "#ffc928"); g.addColorStop(1, "#d99a0c"); ctx.fillStyle = g; ctx.fill(); ctx.restore();
+    ctx.save(); rr(ctx, x + 6, y + 6, w - 12, h * .42, h * .3); ctx.fillStyle = "rgba(255,255,255,.35)"; ctx.fill(); ctx.restore();
+    ctx.save(); ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillStyle = "#1b1102"; ajustarFuente(ctx, "¡NO TE LO PIERDAS!", 58, 900, FUENTE_T, w - 80); ctx.fillText("¡NO TE LO PIERDAS!", FW / 2, y + h / 2 + 3); ctx.restore();
+    // redes
+    const ry = FH - 92; ctx.save(); ctx.font = `800 27px ${FUENTE_X}`; ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    const ig = "@ia_el_colorado26", yt = "@iaelcolorado", wi = ctx.measureText(ig).width, wy = ctx.measureText(yt).width, tot = 44 + 12 + wi + 60 + 44 + 12 + wy; let rx = FW / 2 - tot / 2;
+    // ícono Instagram
+    const gi = ctx.createLinearGradient(rx, ry + 22, rx + 44, ry - 22); gi.addColorStop(0, "#feda75"); gi.addColorStop(.35, "#fa7e1e"); gi.addColorStop(.6, "#d62976"); gi.addColorStop(1, "#4f5bd5");
+    rr(ctx, rx, ry - 22, 44, 44, 12); ctx.fillStyle = gi; ctx.fill(); ctx.strokeStyle = "#fff"; ctx.lineWidth = 3.4; rr(ctx, rx + 9, ry - 13, 26, 26, 8); ctx.stroke(); ctx.beginPath(); ctx.arc(rx + 22, ry, 6.5, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(rx + 30, ry - 8, 2.2, 0, Math.PI * 2); ctx.fill();
+    rx += 56; ctx.fillStyle = "#f4f6ff"; ctx.fillText(ig, rx, ry); rx += wi + 60;
+    // ícono YouTube
+    rr(ctx, rx, ry - 16, 44, 32, 9); ctx.fillStyle = "#ff0033"; ctx.fill(); ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.moveTo(rx + 17, ry - 9); ctx.lineTo(rx + 31, ry); ctx.lineTo(rx + 17, ry + 9); ctx.closePath(); ctx.fill();
+    rx += 56; ctx.fillStyle = "#f4f6ff"; ctx.fillText(yt, rx, ry); ctx.restore();
   }
-  function pieFlyer(ctx) {
-    texto3D(ctx, "¡NO TE LO PIERDAS!", FW / 2, FH - 150, 92, "#FDE047");
-    ctx.textAlign = "center"; ctx.fillStyle = "#e6f3ff"; const red = "Instagram @ia_el_colorado26 · YouTube @iaelcolorado"; let tr = 34; do { ctx.font = `800 ${tr}px ${FUENTE_X}`; tr -= 2; } while (ctx.measureText(red).width > FW - 80 && tr > 18); ctx.fillText(red, FW / 2, FH - 70);
+  /* logo protagonista con aura y anillos */
+  function logoHeroe(ctx, L, cx, cy, alto, col) {
+    halo(ctx, cx, cy, alto * 1.25, col, .6); halo(ctx, cx, cy, alto * .7, "#ffffff", .18);
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(1, .32); ctx.strokeStyle = hexA(col, .8); ctx.lineWidth = 5; ctx.shadowColor = col; ctx.shadowBlur = 24;
+    ctx.beginPath(); ctx.arc(0, alto * 1.25, alto * .85, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = .45; ctx.beginPath(); ctx.arc(0, alto * 1.25, alto * 1.05, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+    if (L) logo3D(ctx, L, cx, cy, alto, { maxW: alto * 2.1, prof: Math.round(alto * .08) });
   }
+  const DIAS_FLY = { dia1: [{ n: "17" }], dia2: [{ n: "24" }], general: [{ n: "17" }, { n: "24" }] };
+  const diaDe = (x) => (x.lugar > 16 ? { n: "24" } : { n: "17" });
   async function flyerProyecto(x) {
-    const p = perfil(x), d = parteDe(x), n = numero(x), L = await logoListo(x.id);
+    const p = perfil(x), n = numero(x), L = await logoListo(x.id);
     const bg = await fondoFlyer(p.esc, x, p.holos.slice(0, 3));
     const cv = document.createElement("canvas"); cv.width = FW; cv.height = FH; const ctx = cv.getContext("2d");
-    marcoFlyer(ctx, bg, p.color);
-    let y = ganchoFlyer(ctx, p.ganchoTxt, 270, p.color);
-    if (L) logo3D(ctx, L, FW / 2, y + 190, 250, { maxW: 560, prof: 18 });
-    // bloque inferior
-    y = 990; cartel(ctx, FW / 2, y, `EXPOSITOR N.º ${n}`, 36, p.color, "#0b1220", FUENTE_X, .02);
-    ctx.font = `900 92px ${FUENTE_T}`; let tam = 92; while (ctx.measureText(p.nombre.toUpperCase()).width > FW - 100 && tam > 50) { tam -= 4; ctx.font = `900 ${tam}px ${FUENTE_T}`; }
-    texto3D(ctx, p.nombre.toUpperCase(), FW / 2, y + 120, tam, "#ffffff");
-    ctx.font = `800 36px ${FUENTE_X}`; ctx.fillStyle = p.color; ctx.textAlign = "center";
-    cortarLineas(ctx, listaY(p.integrantes), FW - 140).slice(0, 2).forEach((l, i) => ctx.fillText(l, FW / 2, y + 180 + i * 44));
-    ctx.font = `600 38px ${FUENTE_X}`; ctx.fillStyle = "#f4f1e8";
-    const ol = cortarLineas(ctx, p.pubObjetivo, FW - 160).slice(0, 2); ol.forEach((l, i) => ctx.fillText(l, FW / 2, y + 290 + i * 48));
-    bloqueFecha(ctx, [d], Math.min(y + 300 + ol.length * 48, FH - 250 - altoFecha(1)));
-    pieFlyer(ctx);
+    fondo(ctx, bg, p.color);
+    const yc = cabecera(ctx);
+    franja(ctx, p.ganchoTxt, yc + 78, p.color);
+    logoHeroe(ctx, L, FW / 2, yc + 330, 230, p.color);
+    // ficha del proyecto
+    let y = 1000;
+    ctx.save(); ctx.textAlign = "center"; ctx.font = `900 26px ${FUENTE_X}`; espaciado(ctx, 8); const et = `EXPOSITOR N.º ${n}`, we = ctx.measureText(et).width + 60;
+    rr(ctx, FW / 2 - we / 2, y - 40, we, 56, 28); ctx.fillStyle = "rgba(7,12,26,.7)"; ctx.fill(); ctx.strokeStyle = p.color; ctx.lineWidth = 2.5; ctx.stroke(); ctx.fillStyle = p.color; ctx.fillText(et, FW / 2 + 4, y - 2); ctx.restore();
+    const tn = ajustarFuente(ctx, p.nombre.toUpperCase(), 112, 900, FUENTE_T, FW - 130, 54);
+    metal(ctx, p.nombre.toUpperCase(), FW / 2, y + 40 + tn * .82, tn, { colores: PLATA, borde: "#0f1628" });
+    y += 40 + tn * .82 + 58;
+    ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = p.color; ctx.font = `800 31px ${FUENTE_X}`; const il = cortarLineas(ctx, listaY(p.integrantes), FW - 160).slice(0, 2); il.forEach((l, i) => ctx.fillText(l, FW / 2, y + i * 40)); y += il.length * 40 + 22;
+    ctx.fillStyle = "rgba(240,244,255,.92)"; ctx.font = `500 33px ${FUENTE_X}`; cortarLineas(ctx, p.pubObjetivo, FW - 180).slice(0, il.length > 1 ? 1 : 2).forEach((l, i) => ctx.fillText(l, FW / 2, y + i * 44)); ctx.restore();
+    entrada(ctx, FH - 572, [diaDe(x)]);
+    cierre(ctx);
     return { png: cv.toDataURL("image/png"), archivo: `flyer-${n}-${slug(p.nombre)}`, kit: kitIG("proyecto", x, n), titulo: `Flyer · ${p.nombre}` };
   }
   async function flyerGrupo(tipo) {
     const lista = ordenados(), dias = tipo === "dia1" ? [0] : tipo === "dia2" ? [1] : [0, 1];
     const de = lista.filter((y) => dias.includes(y.lugar > 16 ? 1 : 0)), Ls = await Promise.all(de.map((y) => logoListo(y.id)));
+    const col = tipo === "dia2" ? "#F472B6" : tipo === "dia1" ? "#38BDF8" : "#A78BFA";
     const bg = await fondoFlyer("rfa", null, tipo === "general" ? ["chip", "estrella", "corazon"] : ["chip", "estrella"]);
     const cv = document.createElement("canvas"); cv.width = FW; cv.height = FH; const ctx = cv.getContext("2d");
-    marcoFlyer(ctx, bg, "#67E8F9");
-    const gancho = tipo === "general" ? `${de.length} PROYECTOS CON IA · 1 PUEBLO` : GANCHO_DIA[dias[0]].replace("5", String(de.length));
-    ganchoFlyer(ctx, gancho, 270, "#FDE047");
-    let y;
+    fondo(ctx, bg, col);
+    const yc = cabecera(ctx);
+    franja(ctx, tipo === "general" ? `${de.length} PROYECTOS CON IA · HECHOS ACÁ` : `${de.length} PROYECTOS CON IA · UNA NOCHE`, yc + 78, col);
+    const top = tipo === "general" ? 720 : 640, bot = FH - 600;
     if (tipo === "general") {
-      y = 920; const cols = 5, cw = (FW - 80) / cols, filas = Math.ceil(de.length / cols);
-      de.forEach((x, i) => { const cx = 40 + cw * (i % cols) + cw / 2, cy = y + Math.floor(i / cols) * 185 + 70; if (Ls[i]) logo3D(ctx, Ls[i], cx, cy, 120, { maxW: cw - 24, prof: 9 });
-        ctx.font = `800 22px ${FUENTE_X}`; ctx.fillStyle = "#e6f3ff"; ctx.textAlign = "center"; cortarLineas(ctx, perfil(x).nombre, cw - 10).slice(0, 2).forEach((l, k) => ctx.fillText(l, cx, cy + 92 + k * 25)); });
-      y += filas * 190 + 20;
+      const cols = 5, gap = 16, cw = (FW - 120 - gap * (cols - 1)) / cols, filas = Math.ceil(de.length / cols), ch = Math.min(250, (bot - top - gap * (filas - 1)) / filas);
+      de.forEach((x, i) => { const p = perfil(x), cx = 60 + (i % cols) * (cw + gap), cy = top + Math.floor(i / cols) * (ch + gap);
+        cristal(ctx, cx, cy, cw, ch, 22, p.color, .7); halo(ctx, cx + cw / 2, cy + ch * .4, cw * .55, p.color, .35);
+        if (Ls[i]) logo3D(ctx, Ls[i], cx + cw / 2, cy + ch * .4, ch * .46, { maxW: cw - 26, prof: 8 });
+        ctx.save(); ctx.textAlign = "center"; ctx.fillStyle = "#f4f6ff"; ctx.font = `800 20px ${FUENTE_X}`; cortarLineas(ctx, p.nombre, cw - 16).slice(0, 2).forEach((l, k) => ctx.fillText(l, cx + cw / 2, cy + ch * .8 + k * 23)); ctx.restore(); });
     } else {
-      y = 960; const fila = Math.min(118, (FH - 270 - altoFecha(1) - y) / Math.max(1, de.length));
-      de.forEach((x, i) => { const p = perfil(x), yy = y + i * fila;
-        rr(ctx, 60, yy, FW - 120, fila - 14, 22); ctx.fillStyle = "rgba(6,12,28,.72)"; ctx.fill(); ctx.fillStyle = p.color; ctx.fillRect(60, yy + 10, 10, fila - 34);
-        if (Ls[i]) logo3D(ctx, Ls[i], 160, yy + (fila - 14) / 2, fila * .62, { maxW: 140, prof: 7 });
-        ctx.textAlign = "left"; ctx.font = `900 ${Math.round(fila * .32)}px ${FUENTE_T}`; ctx.fillStyle = "#ffffff"; ctx.fillText(`${numero(x)}. ${p.nombre.toUpperCase()}`, 250, yy + fila * .42);
-        ctx.font = `700 ${Math.round(fila * .22)}px ${FUENTE_X}`; ctx.fillStyle = p.color; ctx.fillText(cortarLineas(ctx, p.tag, FW - 340)[0], 250, yy + fila * .72); });
-      y += de.length * fila + 10;
+      const gap = 14, fila = Math.min(150, (bot - top - gap * (de.length - 1)) / Math.max(1, de.length));
+      de.forEach((x, i) => { const p = perfil(x), yy = top + i * (fila + gap);
+        cristal(ctx, 60, yy, FW - 120, fila, 24, p.color, .72);
+        ctx.save(); rr(ctx, 60, yy, FW - 120, fila, 24); ctx.clip(); ctx.fillStyle = p.color; ctx.fillRect(60, yy, 10, fila); ctx.restore();
+        halo(ctx, 175, yy + fila / 2, fila * .75, p.color, .4); if (Ls[i]) logo3D(ctx, Ls[i], 175, yy + fila / 2, fila * .66, { maxW: 150, prof: 7 });
+        ctx.save(); ctx.textAlign = "left"; const nm = p.nombre.toUpperCase(); const tn = ajustarFuente(ctx, nm, Math.round(fila * .3), 900, FUENTE_T, FW - 400, 24); ctx.fillStyle = "#ffffff"; ctx.fillText(nm, 275, yy + fila * .45);
+        ctx.font = `700 ${Math.round(fila * .19)}px ${FUENTE_X}`; ctx.fillStyle = p.color; ctx.fillText(cortarLineas(ctx, p.tag.replace(/^./, (c) => c.toUpperCase()), FW - 420)[0], 275, yy + fila * .76); ctx.restore(); });
     }
-    bloqueFecha(ctx, dias.map((i) => parteDe({ lugar: i ? 17 : 1 })), FH - 250 - altoFecha(dias.length));
-    pieFlyer(ctx);
+    entrada(ctx, FH - 572, DIAS_FLY[tipo]);
+    cierre(ctx);
     const archivo = tipo === "general" ? "flyer-coloquio-final-los-proyectos" : `flyer-coloquio-final-${tipo === "dia1" ? "martes-17" : "martes-24"}`;
-    return { png: cv.toDataURL("image/png"), archivo, kit: kitIG(tipo), titulo: tipo === "general" ? "Flyer · Los proyectos" : `Flyer · ${parteDe({ lugar: tipo === "dia2" ? 17 : 1 }).parte}` };
+    return { png: cv.toDataURL("image/png"), archivo, kit: kitIG(tipo), titulo: tipo === "general" ? "Flyer · Los proyectos" : `Flyer · Martes ${tipo === "dia1" ? 17 : 24}` };
   }
   async function hacerFlyer(cual) {
     if (!C()) { nota("El escenario todavía está cargando. Probá en unos segundos."); return null; }
@@ -6059,8 +6146,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     if (seccion === "flyers") {
       const n1 = O.filter((x) => x.lugar <= 16).length, n2 = O.length - n1;
       h += `<li><button type="button" data-fly="general"><span class="n todos">★</span><span><b>General · los ${O.length} proyectos</b><small>Las dos fechas del Coloquio Final</small></span><span class="acc">🖼️</span></button></li>`;
-      h += `<li><button type="button" data-fly="dia1"><span class="n dia">17</span><span><b>Primera parte · martes 17</b><small>${n1} proyectos</small></span><span class="acc">🖼️</span></button></li>`;
-      h += `<li><button type="button" data-fly="dia2"><span class="n dia">24</span><span><b>Segunda parte · martes 24</b><small>${n2} proyectos</small></span><span class="acc">🖼️</span></button></li>`;
+      h += `<li><button type="button" data-fly="dia1"><span class="n dia">17</span><span><b>Martes 17 de noviembre</b><small>${n1} proyectos</small></span><span class="acc">🖼️</span></button></li>`;
+      h += `<li><button type="button" data-fly="dia2"><span class="n dia">24</span><span><b>Martes 24 de noviembre</b><small>${n2} proyectos</small></span><span class="acc">🖼️</span></button></li>`;
     }
     if (seccion === "publicidad") h += `<li><button type="button" data-todos="1"><span class="n todos">★</span><span><b>Los ${O.length} proyectos</b><small>Promoción de todo el coloquio · 30 s</small></span><span class="acc">🎬</span></button></li>`;
     O.forEach((x, k) => {
@@ -6111,6 +6198,9 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   window.__coloquioShow = { estudioProyecto, estudioTodos, estudioPaso, estudioFuera, musicaPub, musicaStop, estudio: () => E, medir: () => { holoInit(); medirAG1(); }, preparar: async (id) => { holoInit(); const x = L2().find((i) => i.id === id); H.x = x; H.perfil = perfil(x); await cargarLogo(x); }, rodar, kitIG, mostrarKit, hacerFlyer, flyerProyecto, flyerGrupo, guionColoquio, guionPublicidad, guionTodos, agregar, fusion, limpiar, hud, perfil, datos: () => datos, MODELOS: () => Object.keys(MODELOS), holo: () => H };
 })();
 </script>
+
+
+
 
 
 
