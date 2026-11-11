@@ -4955,9 +4955,9 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
      PERFILES de cada proyecto (guion, escenario y hologramas)
      ===================================================================== */
   const PERFILES = {
-    "CF-BF3F3": { cortos: ["Élida Centurión", "María de los Ángeles Rolón", "Mariel Galli"], pasos: [["🛍️", "VIDRIERA DIGITAL", "El objetivo: una vidriera digital para los emprendedores del pueblo."], ["🔎", "BUSCÁS", "Buscás por rubro y contactás directo a quien vende."], ["📲", "CONTACTÁS", "Y comprás lo nuestro sin salir de casa."]],
+    "CF-BF3F3": { cortos: ["Ely Centurión", "María de los Ángeles Rolón", "Mariel Galli"], pasos: [["🛍️", "VIDRIERA DIGITAL", "El objetivo: una vidriera digital para los emprendedores del pueblo."], ["🔎", "BUSCÁS", "Buscás por rubro y contactás directo a quien vende."], ["📲", "CONTACTÁS", "Y comprás lo nuestro sin salir de casa."]],
       nombre: "Feria Digital Coloradense", voz: "Feria Digital Coloradense", esc: "plaza", color: "#FBBF24",
-      integrantes: ["Élida Centurión", "María de los Ángeles Rolón", "Mariel Galli"], saludo: "Élida, María de los Ángeles y Mariel",
+      integrantes: ["Ely Centurión", "María de los Ángeles Rolón", "Mariel Galli"], saludo: "Ely, María de los Ángeles y Mariel",
       holos: ["puesto", "bolsa", "moneda", "pin"], tag: "la vidriera de nuestros emprendedores",
       gancho: "¿Sabías que El Colorado tiene una feria que nunca cierra?", ganchoTxt: "UNA FERIA QUE NUNCA CIERRA",
       objetivo: "crear un espacio digital de encuentro, promoción y venta para los emprendedores, artesanos, productores y pequeños comerciantes de El Colorado.",
@@ -5114,8 +5114,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   function guionPublicidad(x, n) {
     const p = perfil(x), h = p.holos, d = parteDe(x), pasos = (p.pasos || pasosAuto(p)).slice(0, 3);
     return { formato: "9:16", esc: p.esc, musica: "accion", max: 30, archivo: `publicidad-${slug(p.nombre)}`, beats: [
-      { v: "ag1", d: p.gancho, intro: { lista: [...new Set([...h, "chip", "estrella"])].slice(0, 6).map((n) => ({ n })), logo: true }, hud: { tipo: "intro", palabras: [...p.palabras, ...p.palabras2], txt: p.ganchoTxt }, toma: "travelling", fx: "impacto", flash: .6, temblor: .5, glitch: true },
-      { v: "ag1", d: `Es ${p.voz}, de ${listaY(p.cortos || p.integrantes)}.`, hud: { tipo: "integrantes" }, holo: ["logo"], toma: "travelling", fx: "whoosh", flash: .3 },
+      { v: "locutor", d: p.gancho, minT: 5, estudio: "intro", hud: { tipo: "intro", palabras: [...p.palabras, ...p.palabras2], txt: p.ganchoTxt }, fx: "impacto", flash: .7, temblor: .4, glitch: true },
+      { v: "ag1", estudio: "salir", glitch: true, d: `Es ${p.voz}, de ${listaY(p.cortos || p.integrantes)}.`, hud: { tipo: "integrantes" }, holo: ["logo"], toma: "travelling", fx: "whoosh", flash: .3 },
       { sting: true, t: .9, estudio: "entrar", glitch: true, fx: "impacto", hud: { tipo: "sting", txt: "¿CÓMO FUNCIONA?", sub: "EXPLICADO EN 3 PASOS" } },
       ...pasos.map((s, i) => ({ v: "locutor", d: s[2], estudio: { paso: i }, hud: { tipo: "estudio", paso: i, n: pasos.length }, fx: "whoosh", opcional: i === 2 })),
       { v: "ag1", d: "¡No te pierdas el Coloquio Final!", estudio: "salir", glitch: true, esc: "rfa", hud: { tipo: "fecha", partes: [d] }, holo: ["corazon", "estrella"], toma: "dolly", fx: "impacto", flash: .35 },
@@ -5126,7 +5126,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   function guionTodos(lista) {
     const n = lista.length, uno = parteDe({ lugar: 1 }), dos = parteDe({ lugar: 17 });
     return { formato: "9:16", esc: "rfa", musica: "accion", max: 30, archivo: "publicidad-coloquio-final-los-proyectos", todos: true, lista, beats: [
-      { v: "ag1", d: `¡${n === 10 ? "Diez" : n} proyectos con inteligencia artificial, hechos en El Colorado!`, esc: "rfa", minT: 5, intro: { lista: lista.slice(0, 8).map((x) => ({ n: perfil(x).holos[0], c: perfil(x).color })) }, hud: { tipo: "intro", palabras: ["HUERTAS", "RADIO", "DENGUE", "CIENCIA 3D", "JUEGOS", "CINE CON IA"], txt: `${n} PROYECTOS · 1 PUEBLO` }, toma: "travelling", fx: "impacto", flash: .6, temblor: .5, glitch: true },
+      { v: "locutor", d: `¡${n === 10 ? "Diez" : n} proyectos con inteligencia artificial, hechos en El Colorado!`, esc: "rfa", minT: 5, estudio: "introTodos", hud: { tipo: "intro", palabras: ["HUERTAS", "RADIO", "DENGUE", "CIENCIA 3D", "JUEGOS", "CINE CON IA"], txt: `${n} PROYECTOS · 1 PUEBLO` }, toma: "travelling", fx: "impacto", flash: .6, temblor: .5, glitch: true },
       { sting: true, t: .9, estudio: "entrarTodos", glitch: true, fx: "impacto", hud: { tipo: "sting", txt: "MIRÁ LO QUE CREAMOS", sub: "COLOQUIO FINAL · AUXILIAR EN IA" } },
       { v: "locutor", d: "Huertas con inteligencia artificial, radios comunitarias, mapas contra el dengue, ciencia en 3D…", estudio: { carrusel: 0 }, hud: { tipo: "estudioTodos" }, fx: "whoosh" },
       { v: "locutor", d: "juegos, trámites claros y cine con IA. ¡Todo hecho acá!", estudio: { carrusel: 1 }, hud: { tipo: "estudioTodos" }, fx: "whoosh" },
@@ -5557,6 +5557,55 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     if (E.tipo === "pasos") { const t = E.tarjetas[i]; if (!t) return; t.userData.mostrar = E.tPaso; if (t.userData.modelo) t.userData.modelo.userData.mostrar = E.tPaso + .15; const v = t.position; E.obj.p.set(v.x * .7, v.y + .9, v.z + 8.4); E.obj.l.set(v.x * .92, v.y + .55, v.z); }
     else if (E.tipo === "carrusel") { E.tarjetas.forEach((t, k) => { if (k < (i + 1) * Math.ceil(E.tarjetas.length / 2)) t.userData.mostrar = t.userData.mostrar || E.tPaso + k % Math.ceil(E.tarjetas.length / 2) * .18; }); }
   }
+  /* GANCHO CINEMATOGRÁFICO (primeros 5 s de la publicidad): sin AG1, locutor, logo gigante y hologramas en profundidad */
+  function holoVivo(o, t) { o.traverse((m) => { const u = m.material?.uniforms; if (u) { if (u.uT) u.uT.value = t; if (u.uVis) u.uVis.value = 1; } }); }
+  async function estudioIntro(p, lista) {
+    const col = p.color || "#67E8F9"; estudioNuevo(col);
+    E.fondo.material.uniforms.uA.value.set("#01030a"); E.fondo.material.uniforms.uB.value.multiplyScalar(.45);
+    const g = E.g, A = T().Additive;
+    // logo protagonista (o los logos de todos)
+    const heroe = new (T().Group)(); heroe.position.set(0, 3.3, 0); g.add(heroe); E.heroe = heroe;
+    if (lista) {
+      const Ls = await Promise.all(lista.map((x) => logoListo(x.id)));
+      lista.forEach((x, i) => { if (!Ls[i]) return; const r = logoRelieve(Ls[i], 1.5, .26, 18), a = i / lista.length * Math.PI * 2, c = new (T().Group)(); c.add(r); c.userData.a = a; c.userData.relieve = r; heroe.add(c); });
+      const tit = textoHolo("COLOQUIO FINAL", "#FDE047", 1.15); tit.position.y = 0; holoVivo(tit, 0); heroe.add(tit); heroe.userData.carrusel = true;
+    } else if (H.logoL) { const r = logoRelieve(H.logoL, 3.8, .7, 34); heroe.add(r); heroe.userData.relieve = r; }
+    else { const tit = textoHolo((p.nombre || "").toUpperCase(), col, 1.1); heroe.add(tit); }
+    // anillos holográficos alrededor del logo
+    E.anillos = [0, 1, 2].map((i) => { const m = new (T().Mesh)(new (T().Torus)(3.1 + i * .55, .025 + i * .01, 8, 120), new (T().Basic)({ color: i === 1 ? "#ffffff" : col, transparent: true, opacity: .75 - i * .18, blending: A, depthWrite: false })); m.material.fog = false; m.position.copy(heroe.position); m.rotation.set(Math.PI / 2 + (i - 1) * .5, i * .6, 0); g.add(m); return m; });
+    // haces de luz volumétricos desde el piso
+    E.haces = [];
+    for (let i = 0; i < 9; i++) { const h = 16, m = new (T().Mesh)(new (T().Cylinder)(.08, 1.4, h, 24, 1, true), new (T().Basic)({ color: i % 3 ? col : "#ffffff", transparent: true, opacity: .085, blending: A, depthWrite: false, side: T().DoubleSide })); m.material.fog = false;
+      const a = i / 9 * Math.PI * 2, R = 6 + (i % 3) * 3; m.position.set(Math.sin(a) * R, h / 2 - .2, Math.cos(a) * R - 6); m.rotation.set((Math.random() - .5) * .3, 0, (Math.random() - .5) * .3); m.userData.fase = Math.random() * 6; g.add(m); E.haces.push(m); }
+    // hologramas en capas de profundidad (la cámara vuela entre ellos)
+    E.flotan = [];
+    const nombres = lista ? lista.map((x) => [perfil(x).holos[0], perfil(x).color]) : [...p.holos, "chip", "estrella", "corazon", ...p.holos].map((n) => [n, col]);
+    for (let i = 0; i < 18; i++) { const [nom, c] = nombres[i % nombres.length]; if (!MODELOS[nom]) continue; const mdl = MODELOS[nom](c); const k = new (T().Group)(); k.add(mdl); k.userData.anim = mdl.userData.anim;
+      const lado = i % 2 ? 1 : -1, z = 14 - i * 2.1; k.position.set(lado * (2.6 + Math.random() * 3.4), .6 + Math.random() * 6, z); k.userData.k = 1.1 + Math.random() * 1.3; k.userData.giro = (Math.random() - .5) * 2.4; k.userData.fase = Math.random() * 6; k.scale.setScalar(.001); g.add(k); E.flotan.push(k); }
+    // polvo de luz
+    const n = 1400, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) pos.set([(Math.random() - .5) * 30, Math.random() * 12, 18 - Math.random() * 40], i * 3);
+    const geo = new (T().BufferGeometry)(); geo.setAttribute("position", new (T().F32)(pos, 3));
+    const pm = new (T().PointsMat)({ color: "#ffffff", size: .07, transparent: true, opacity: .85, depthWrite: false, blending: A }); pm.fog = false; E.polvo = new (T().Points)(geo, pm); g.add(E.polvo);
+    const luz2 = new (T().PointLight)(col, 90, 30); luz2.position.set(0, 4, 6); g.add(luz2);
+    E.tipo = "intro"; E.activo = true; E.t0 = performance.now() / 1000; E.fov = 62;
+  }
+  function introTick(t, cam) {
+    const e = t - E.t0, base = E.g.position;
+    // la cámara entra volando por el túnel de hologramas y frena frente al logo
+    const f = Math.min(1, e / 4.6), ef = 1 - Math.pow(1 - f, 3);
+    const cz = 36 - ef * 22.5, cx = Math.sin(e * .9) * 2.2 * (1 - ef * .6), cy = 4.6 - ef * 1.1 + Math.sin(e * 1.7) * .15;
+    cam.position.set(base.x + cx, base.y + cy, base.z + cz); cam.up.set(0, 1, 0); cam.lookAt(base.x, base.y + 3.3, base.z); cam.rotateZ(Math.sin(e * 1.2) * .07 * (1 - ef * .7));
+    const fov = 70 - ef * 22; if (Math.abs(cam.fov - fov) > .05) { cam.fov = fov; cam.updateProjectionMatrix(); }
+    // logo: entra girando y late
+    const h = E.heroe, s = Math.max(.001, easeOutBack((e - .55) / 1.1));
+    h.scale.setScalar(s * (1 + Math.max(0, Math.sin((e - 3.9) * 6)) * (e > 3.9 && e < 4.45 ? .12 : 0)));
+    if (h.userData.carrusel) { h.children.forEach((c) => { if (c.userData.a == null) { c.lookAt(cam.position.x - base.x, c.position.y + 3.3, cam.position.z - base.z); return; } const a = c.userData.a + e * .9; c.position.set(Math.sin(a) * 3.6, Math.sin(a * 2 + e) * .4, Math.cos(a) * 3.6); c.rotation.y = a; c.userData.relieve?.traverse((o) => { if (o.material?.uniforms?.uT) o.material.uniforms.uT.value = t; }); }); holoVivo(h, t); }
+    else { h.rotation.y = (1 - Math.min(1, easeOutBack((e - .55) / 1.3))) * Math.PI * 4 + Math.sin(e * 1.3) * .25; h.userData.relieve?.traverse((o) => { if (o.material?.uniforms?.uT) o.material.uniforms.uT.value = t; }); holoVivo(h, t); }
+    E.anillos.forEach((r, i) => { r.rotation.z = e * (1.2 + i * .5) * (i % 2 ? -1 : 1); r.rotation.x = Math.PI / 2 + Math.sin(e * .8 + i) * .5; r.scale.setScalar(Math.max(.001, easeOutBack((e - .3 - i * .15) / .8))); });
+    E.haces.forEach((m) => { m.material.opacity = .05 + .06 * (.5 + .5 * Math.sin(e * 3 + m.userData.fase)); m.rotation.y = e * .3; });
+    E.flotan.forEach((k, i) => { const u = k.userData; k.scale.setScalar(Math.max(.001, easeOutBack((e - .1 - i * .05) / .6)) * u.k); k.rotation.y = e * u.giro + u.fase; k.position.y += Math.sin(e * 2 + u.fase) * .004; u.anim && u.anim(t, { t0: E.t0, fase: u.fase }); holoVivo(k, t); });
+    E.polvo.rotation.y = e * .05;
+  }
   const easeOutBack = (x) => { x = Math.max(0, Math.min(1, x)); const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
   let tCam = performance.now();
   window.__camExtra = () => {
@@ -5564,6 +5613,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
     if (!E || !E.activo) return;
     const t = ahora / 1000, cam = C().ii, k = 1 - Math.exp(-dt * 2.6);
     E.fondo.material.uniforms.uT.value = t;
+    if (E.tipo === "intro") { introTick(t, cam); return; }
     if (E.moneda) { const e = t - E.t0, f = E.tPaso ? Math.min(1, (t - E.tPaso) / .8) : 0, ff = f * f * (3 - 2 * f);
       E.moneda.rotation.y = e < 1 ? (1 - easeOutBack(e)) * 6 + Math.sin(t * 1.4) * .25 : Math.sin(t * 1.4) * .25 + ff * Math.sin(t * .7) * .3;
       E.moneda.position.set(0, 3 + ff * 3.4 + Math.sin(t * 2) * .12, 1.2 - ff * 9); E.moneda.scale.setScalar(Math.min(1, .2 + e * 1.6) * (1 - ff * .2));
@@ -5634,6 +5684,7 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
       ctx.globalCompositeOperation = "lighter"; ctx.globalAlpha = .7; const d = tt * .05 * (1 - f); ctx.fillStyle = "#ff2a55"; ctx.fillText(w, -d - 3, 0); ctx.fillStyle = "#22e6ff"; ctx.fillText(w, d + 3, 0);
       ctx.globalCompositeOperation = "source-over"; ctx.globalAlpha = 1; texto3D(ctx, w, 0, 0, tt, i % 2 ? "#ffffff" : col); ctx.restore();
       if (f < .18) { ctx.fillStyle = `rgba(255,255,255,${(.18 - f) * 1.6})`; ctx.fillRect(0, 0, W, Hh); }
+      const bar = Hh * .065 * Math.min(1, e / .4); ctx.fillStyle = "#000"; ctx.fillRect(0, 0, W, bar); ctx.fillRect(0, Hh - bar, W, bar);
     } else if (hud.tipo === "gancho") {
       const s = e < .35 ? 2.2 - 1.2 * easeBack(e / .35) : 1 + .025 * Math.sin(e * 10), y = vert ? Hh * .2 : Hh * .2;
       ctx.translate(W / 2, y); ctx.scale(s, s); ctx.rotate(Math.sin(e * 18) * (e < .5 ? .03 : .006));
@@ -5775,6 +5826,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
         if (b.glitch) H.glitchT = c.vt.elapsedTime;
         if (b.estudio === "salir") estudioFuera();
         else if (b.estudio === "entrar") { limpiar(true); estudioProyecto(H.perfil); }
+        else if (b.estudio === "intro") { limpiar(true); await estudioIntro(H.perfil); }
+        else if (b.estudio === "introTodos") { limpiar(true); await estudioIntro({ color: "#A78BFA" }, (guion.lista || ordenados()).slice(0, 10)); }
         else if (b.estudio === "entrarTodos") { limpiar(true); await estudioTodos(guion.lista || ordenados()); }
         else if (b.estudio && b.estudio.paso != null) estudioPaso(b.estudio.paso);
         else if (b.estudio && b.estudio.carrusel != null) estudioPaso(b.estudio.carrusel);
@@ -6226,6 +6279,8 @@ body.colq-rodando #coloquioPanel:hover{opacity:1}
   window.__coloquioShow = { estudioProyecto, estudioTodos, estudioPaso, estudioFuera, musicaPub, musicaStop, estudio: () => E, medir: () => { holoInit(); medirAG1(); }, preparar: async (id) => { holoInit(); const x = L2().find((i) => i.id === id); H.x = x; H.perfil = perfil(x); await cargarLogo(x); }, rodar, kitIG, mostrarKit, hacerFlyer, flyerProyecto, flyerGrupo, guionColoquio, guionPublicidad, guionTodos, agregar, fusion, limpiar, hud, perfil, datos: () => datos, MODELOS: () => Object.keys(MODELOS), holo: () => H };
 })();
 </script>
+
+
 
 
 
